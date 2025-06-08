@@ -1,0 +1,26 @@
+// Danh sách các câu nói truyền động lực về tiết kiệm tiền
+const savingQuotes = [
+  {quote: "Rule No. 1 is never lose money. Rule No. 2 is never forget Rule No. 1.", author: "Warren Buffett"},
+  {quote: "Someone's sitting in the shade today because someone planted a tree a long time ago.", author: "Warren Buffett"},
+  {quote: "If you aren't willing to own a stock for 10 years, don't even think about owning it for 10 minutes.", author: "Warren Buffett"},
+  {quote: "Our favourite holding period is forever.", author: "Warren Buffett"},
+  {quote: "The key to investing is not assessing how much an industry is going to affect society, or how much it will grow, but rather determining the competitive advantage of any given company and, above all, the durability of that advantage.", author: "Warren Buffett"},
+  {quote: "Do not save what is left after spending, but spend what is left after saving.", author: "Warren Buffett"},
+  {quote: "Beware of little expenses; a small leak will sink a great ship.", author: "Benjamin Franklin"},
+  {quote: "A penny saved is a penny earned.", author: "Benjamin Franklin"},
+  {quote: "The habit of saving is itself an education.", author: "T.T. Munger"},
+  {quote: "A budget is telling your money where to go, instead of wondering where it went.", author: "John C. Maxwell"},
+  {quote: "It's not about how much you make, but how much you keep.", author: "Robert Kiyosaki"},
+  {quote: "Save when you don't need it, and it'll be there for you when you do.", author: "Frank Sonnenberg"},
+  {quote: "Saving is the gap between your ego and your income.", author: "Morgan Housel"},
+  {quote: "Small amounts can add up to big savings over time.", author: "Unknown"},
+  {quote: "If you save in time, you will have in need.", author: "German Proverb"},
+  {quote: "The art is not in making money, but in keeping it.", author: "Proverb"},
+  {quote: "He who buys what he does not need, steals from himself.", author: "Swedish Proverb"},
+  {quote: "The best time to plant a tree was 20 years ago. The second best time is now.", author: "Chinese Proverb"},
+  {quote: "Saving money is good. Saving dreams is not good.", author: "Richie Norton"},
+  {quote: "Not wasting money is the best way to save money.", author: "Mokokoma Mokhonoana"},
+  {quote: "Save a part of your income and begin now, for the man with a surplus controls circumstances and the man without a surplus is controlled by circumstances.", author: "Henry Buckley"},
+  {quote: "The secret of saving is to know the difference between what you need and what you want.", author: "Unknown"},
+  {quote: "Saving is like investing in your future.", author: "Unknown"}
+]; 
