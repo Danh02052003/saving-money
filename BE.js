@@ -77,12 +77,15 @@ function updateMonthInfo() {
   if (currentMonth === 6) {
     dayInfo = `Thời gian: ${data.startDay}/6 - 30/6 (${data.totalDays} ngày)`;
   } else {
-    const daysInMonth = data.totalDays;
+    const daysInMonth =
+      currentMonth === 1
+        ? 31
+        : [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][currentMonth - 1];
     dayInfo = `Thời gian: ${data.startDay}/${
       currentMonth === 1 ? "1" : currentMonth
-    } - ${daysInMonth}/${
-      currentMonth === 1 ? "1" : currentMonth
-    } (${daysInMonth} ngày)`;
+    } - ${daysInMonth}/${currentMonth === 1 ? "1" : currentMonth} (${
+      data.totalDays
+    } ngày)`;
   }
 
   document.getElementById("monthInfo").textContent = dayInfo;
@@ -146,7 +149,6 @@ const findPaidDays = () => {
   return paidDays;
 };
 
-// Sửa lại hàm createDaysGrid để hiển thị và khóa các ngày đã đóng
 function createDaysGrid() {
   const grid = document.getElementById("daysGrid");
   grid.innerHTML = "";
@@ -161,10 +163,9 @@ function createDaysGrid() {
     if (paidDays.includes(i)) {
       dayElement.classList.add("already-paid");
       dayElement.title = "Đã đóng quỹ trước đó";
-      // Vô hiệu hóa click event cho ngày đã đóng
       dayElement.style.cursor = "not-allowed";
     } else {
-      dayElement.onclick = () => toggleDay(i);
+      dayElement.addEventListener("click", () => toggleDay(i));
     }
 
     grid.appendChild(dayElement);
@@ -173,13 +174,16 @@ function createDaysGrid() {
 
 function toggleDay(day) {
   const data = monthsData[currentMonth];
-  const selectedIndex = data.selected.indexOf(day);
-  const paidIndex = data.paid.indexOf(day);
 
-  if (paidIndex > -1) {
-    // Nếu đã đóng, bỏ đánh dấu đã đóng
-    data.paid.splice(paidIndex, 1);
-  } else if (selectedIndex > -1) {
+  // Nếu đã đóng thì không cho thao tác nữa
+  if (data.paid.includes(day)) return;
+
+  // Nếu ngày không có trong danh sách available thì không cho chọn
+  if (!availableDays.includes(day)) return;
+
+  const selectedIndex = data.selected.indexOf(day);
+
+  if (selectedIndex > -1) {
     // Nếu đã chọn nhưng chưa đóng, đánh dấu đã đóng
     data.paid.push(day);
   } else {
@@ -192,17 +196,29 @@ function toggleDay(day) {
 
 function updateDisplay() {
   const data = monthsData[currentMonth];
-
-  // Cập nhật hiển thị các ngày được chọn
   const dayElements = document.querySelectorAll(".day-item");
+
   dayElements.forEach((element) => {
     const day = parseInt(element.textContent);
     element.classList.remove("selected", "paid");
 
+    // Reset event listeners
+    const newElement = element.cloneNode(true);
+    element.parentNode.replaceChild(newElement, element);
+
     if (data.paid.includes(day)) {
-      element.classList.add("paid");
+      newElement.classList.add("paid");
+      newElement.style.cursor = "not-allowed";
     } else if (data.selected.includes(day)) {
-      element.classList.add("selected");
+      newElement.classList.add("selected");
+      newElement.addEventListener("click", () => toggleDay(day));
+      newElement.style.cursor = "pointer";
+    } else if (availableDays.includes(day)) {
+      newElement.addEventListener("click", () => toggleDay(day));
+      newElement.style.cursor = "pointer";
+    } else {
+      newElement.classList.add("already-paid");
+      newElement.style.cursor = "not-allowed";
     }
   });
 
@@ -261,15 +277,8 @@ function updateMonthCalendar() {
   });
 
   // Tính ngày đầu tiên của tháng (0 = Chủ nhật)
-  let firstDay;
-  if (currentMonth === 6) firstDay = 0; // Tháng 6/2025
-  else if (currentMonth === 7) firstDay = 2; // Tháng 7/2025
-  else if (currentMonth === 8) firstDay = 5; // Tháng 8/2025
-  else if (currentMonth === 9) firstDay = 1; // Tháng 9/2025
-  else if (currentMonth === 10) firstDay = 3; // Tháng 10/2025
-  else if (currentMonth === 11) firstDay = 6; // Tháng 11/2025
-  else if (currentMonth === 12) firstDay = 1; // Tháng 12/2025
-  else if (currentMonth === 1) firstDay = 3; // Tháng 1/2026
+  let firstDay = 0;
+  if (currentMonth === 6) firstDay = 0; // Chủ nhật
 
   // Thêm các ô trống cho những ngày trước ngày 1
   for (let i = 0; i < firstDay; i++) {
@@ -277,29 +286,31 @@ function updateMonthCalendar() {
   }
 
   // Thêm các ngày trong tháng
-  const sortedSelected = [...data.selected].sort((a, b) => a - b);
+  const actualDaysInMonth =
+    currentMonth === 6
+      ? 30
+      : currentMonth === 1
+      ? 31
+      : [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][currentMonth - 1];
 
-  for (let day = 1; day <= data.totalDays; day++) {
+  for (let day = 1; day <= actualDaysInMonth; day++) {
     const dayElement = document.createElement("div");
     dayElement.className = "month-day";
+    dayElement.textContent = day;
 
-    if (day >= data.startDay) {
+    // Nếu ngày từ startDay trở đi và trong phạm vi totalDays
+    if (day >= data.startDay && day - data.startDay < data.totalDays) {
       const dayIndex = day - data.startDay;
-
-      if (dayIndex < sortedSelected.length) {
-        const paymentAmount = sortedSelected[dayIndex];
+      if (dayIndex < data.selected.length) {
+        const selectedDay = data.selected[dayIndex];
         dayElement.classList.add("has-payment");
+        dayElement.innerHTML = `${day}<br><small>${selectedDay}k</small>`;
 
-        if (data.paid.includes(paymentAmount)) {
+        if (data.paid.includes(selectedDay)) {
           dayElement.classList.add("paid");
         }
-
-        dayElement.innerHTML = `${day}<br><small>${paymentAmount}k</small>`;
-      } else {
-        dayElement.textContent = day;
       }
-    } else {
-      dayElement.textContent = day;
+    } else if (day < data.startDay) {
       dayElement.style.opacity = "0.3";
     }
 
@@ -322,19 +333,17 @@ function autoSelect() {
   const requiredDays = data.totalDays;
   const sortedDays = [...availableDays].sort((a, b) => a - b);
 
-  // Chọn các số nhỏ nhất trước
+  // Chọn các ngày nhỏ nhất trước
   const smallestDays = sortedDays.slice(0, requiredDays);
   let currentSum = smallestDays.reduce((sum, day) => sum + day * 1000, 0);
-
   data.selected = [...smallestDays];
 
-  // Nếu tổng < target, thay thế các số nhỏ bằng số lớn hơn
+  // Nếu chưa đủ tiền, thay thế bằng các ngày lớn hơn
   if (currentSum < data.target) {
     const remainingDays = sortedDays.slice(requiredDays).sort((a, b) => b - a);
 
     for (let i = 0; i < data.selected.length && currentSum < data.target; i++) {
       const currentDay = data.selected[i];
-
       for (const biggerDay of remainingDays) {
         if (biggerDay > currentDay) {
           const newSum = currentSum - currentDay * 1000 + biggerDay * 1000;
@@ -352,6 +361,8 @@ function autoSelect() {
     }
   }
 
+  // Sắp xếp lại theo thứ tự tăng dần
+  data.selected.sort((a, b) => a - b);
   updateDisplay();
 }
 
